@@ -9,7 +9,7 @@ use fast\Random;
 use think\Config;
 
 /**
- * 公共接口
+ * 公共接口测试
  */
 class Common extends Api
 {
