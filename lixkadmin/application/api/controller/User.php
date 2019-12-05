@@ -13,7 +13,7 @@ use think\Validate;
  */
 class User extends Api
 {
-    protected $noNeedLogin = ['login', 'mobilelogin', 'register', 'resetpwd', 'changeemail', 'changemobile', 'third'];
+    protected $noNeedLogin = ['login', 'mobilelogin', 'register','registereasy', 'resetpwd', 'changeemail', 'changemobile', 'third'];
     protected $noNeedRight = '*';
 
     public function _initialize()
@@ -119,6 +119,27 @@ class User extends Api
             $this->error(__('Captcha is incorrect'));
         }
         $ret = $this->auth->register($username, $password, $email, $mobile, []);
+        if ($ret) {
+            $data = ['userinfo' => $this->auth->getUserinfo()];
+            $this->success(__('Sign up successful'), $data);
+        } else {
+            $this->error($this->auth->getError());
+        }
+    }
+    /**
+     * 注册会员
+     *
+     * @param string $username 用户名
+     * @param string $password 密码
+     */
+    public function registereasy()
+    {
+        $username = $this->request->request('username');
+        $password = $this->request->request('password');
+        if (!$username || !$password) {
+            $this->error(__('Invalid parameters'));
+        }
+        $ret = $this->auth->registereasy($username, $password);
         if ($ret) {
             $data = ['userinfo' => $this->auth->getUserinfo()];
             $this->success(__('Sign up successful'), $data);
