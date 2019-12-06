@@ -134,8 +134,8 @@ class User extends Api
      */
     public function registereasy()
     {
-        $username = $this->request->request('username');
-        $password = $this->request->request('password');
+        $username = $this->request->post('username');
+        $password = $this->request->post('password');
         if (!$username || !$password) {
             $this->error(__('Invalid parameters'));
         }
