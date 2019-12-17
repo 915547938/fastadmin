@@ -12,10 +12,19 @@
 // [ 应用入口文件 ]
 // 定义应用目录
 define('APP_PATH', __DIR__ . '/../application/');
+if($_SERVER['REQUEST_METHOD'] == 'OPTIONS'){
+    $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : 'http://localhost:8080';
+//echo($origin);exit;
+    header('Access-Control-Allow-Origin:'.$origin);
+    header("Access-Control-Allow-Methods:GET, POST, OPTIONS, DELETE,PUT");
+    header("Access-Control-Allow-Headers:DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type, Accept-Language, Origin, Accept-Encoding,Authorization,Token");
+    header('Access-Control-Allow-Credentials:true');
+    exit;
+}
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : 'http://localhost:8080';
 //echo($origin);exit;
 header('Access-Control-Allow-Origin:'.$origin);
-header("Access-Control-Allow-Methods:GET, POST, OPTIONS, DELETE");
+header("Access-Control-Allow-Methods:GET, POST, OPTIONS, DELETE,PUT");
 header("Access-Control-Allow-Headers:DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type, Accept-Language, Origin, Accept-Encoding,Authorization,Token");
 header('Access-Control-Allow-Credentials:true');
 // 判断是否安装FastAdmin

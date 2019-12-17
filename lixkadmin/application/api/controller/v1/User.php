@@ -1,6 +1,6 @@
 <?php
 
-namespace app\api\controller;
+namespace app\api\controller\v1;
 
 use app\common\controller\Api;
 use app\common\library\Ems;
@@ -37,8 +37,8 @@ class User extends Api
      */
     public function login()
     {
-        $account = $this->request->request('account');
-        $password = $this->request->request('password');
+        $account = $this->request->post('account');
+        $password = $this->request->post('password');
         if (!$account || !$password) {
             $this->error(__('Invalid parameters'));
         }

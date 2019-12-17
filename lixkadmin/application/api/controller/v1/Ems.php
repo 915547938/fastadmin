@@ -1,49 +1,55 @@
 <?php
 
-namespace app\api\controller;
+namespace app\api\controller\v1;
 
 use app\common\controller\Api;
-use app\common\library\Sms as Smslib;
+use app\common\library\Ems as Emslib;
 use app\common\model\User;
-use think\Hook;
 
 /**
- * 手机短信接口
+ * 邮箱验证码接口
  */
-class Sms extends Api
+class Ems extends Api
 {
     protected $noNeedLogin = '*';
     protected $noNeedRight = '*';
 
+    public function _initialize()
+    {
+        parent::_initialize();
+        \think\Hook::add('ems_send', function ($params) {
+            $obj = \app\common\library\Email::instance();
+            $result = $obj
+                ->to($params->email)
+                ->subject('验证码')
+                ->message("你的验证码是：" . $params->code)
+                ->send();
+            return $result;
+        });
+    }
+
     /**
      * 发送验证码
      *
-     * @param string $mobile 手机号
+     * @param string $email 邮箱
      * @param string $event 事件名称
      */
     public function send()
     {
-        $mobile = $this->request->request("mobile");
+        $email = $this->request->request("email");
         $event = $this->request->request("event");
         $event = $event ? $event : 'register';
 
-        if (!$mobile || !\think\Validate::regex($mobile, "^1\d{10}$")) {
-            $this->error(__('手机号不正确'));
-        }
-        $last = Smslib::get($mobile, $event);
+        $last = Emslib::get($email, $event);
         if ($last && time() - $last['createtime'] < 60) {
             $this->error(__('发送频繁'));
         }
-        $ipSendTotal = \app\common\model\Sms::where(['ip' => $this->request->ip()])->whereTime('createtime', '-1 hours')->count();
-        if ($ipSendTotal >= 5) {
-            $this->error(__('发送频繁'));
-        }
         if ($event) {
-            $userinfo = User::getByMobile($mobile);
+            $userinfo = User::getByEmail($email);
             if ($event == 'register' && $userinfo) {
                 //已被注册
                 $this->error(__('已被注册'));
-            } elseif (in_array($event, ['changemobile']) && $userinfo) {
+            } elseif (in_array($event, ['changeemail']) && $userinfo) {
                 //被占用
                 $this->error(__('已被占用'));
             } elseif (in_array($event, ['changepwd', 'resetpwd']) && !$userinfo) {
@@ -51,40 +57,34 @@ class Sms extends Api
                 $this->error(__('未注册'));
             }
         }
-        if (!Hook::get('sms_send')) {
-            $this->error(__('请在后台插件管理安装短信验证插件'));
-        }
-        $ret = Smslib::send($mobile, null, $event);
+        $ret = Emslib::send($email, null, $event);
         if ($ret) {
             $this->success(__('发送成功'));
         } else {
-            $this->error(__('发送失败，请检查短信配置是否正确'));
+            $this->error(__('发送失败'));
         }
     }
 
     /**
      * 检测验证码
      *
-     * @param string $mobile 手机号
-     * @param string $event 事件名称
+     * @param string $email   邮箱
+     * @param string $event   事件名称
      * @param string $captcha 验证码
      */
     public function check()
     {
-        $mobile = $this->request->request("mobile");
+        $email = $this->request->request("email");
         $event = $this->request->request("event");
         $event = $event ? $event : 'register';
         $captcha = $this->request->request("captcha");
 
-        if (!$mobile || !\think\Validate::regex($mobile, "^1\d{10}$")) {
-            $this->error(__('手机号不正确'));
-        }
         if ($event) {
-            $userinfo = User::getByMobile($mobile);
+            $userinfo = User::getByEmail($email);
             if ($event == 'register' && $userinfo) {
                 //已被注册
                 $this->error(__('已被注册'));
-            } elseif (in_array($event, ['changemobile']) && $userinfo) {
+            } elseif (in_array($event, ['changeemail']) && $userinfo) {
                 //被占用
                 $this->error(__('已被占用'));
             } elseif (in_array($event, ['changepwd', 'resetpwd']) && !$userinfo) {
@@ -92,7 +92,7 @@ class Sms extends Api
                 $this->error(__('未注册'));
             }
         }
-        $ret = Smslib::check($mobile, $captcha, $event);
+        $ret = Emslib::check($email, $captcha, $event);
         if ($ret) {
             $this->success(__('成功'));
         } else {
