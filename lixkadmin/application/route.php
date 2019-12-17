@@ -10,8 +10,15 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 use think\Route;
+//注册
 Route::rule('register','api/v1.User/registereasy','POST');
+//登录
 Route::rule('login','api/v1.User/login',"POST");
+//新增文章
+Route::rule('articles','api/v1.Article/addarticle',"POST");
+//上传文件
+Route::rule('upload','api/v1.Common/upload',"POST");
+Route::rule('mangyupload','api/v1.Common/uploads',"POST");
 /*return [
     //别名配置,别名只能是映射到控制器且访问时必须加上请求的方法
     '__alias__'   => [
