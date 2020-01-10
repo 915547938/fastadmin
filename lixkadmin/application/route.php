@@ -15,7 +15,7 @@ Route::rule('register','api/v1.User/registereasy','POST');
 //登录
 Route::rule('login','api/v1.User/login',"POST");
 //新增文章
-Route::rule('articles','api/v1.Article/addarticle',"POST");
+Route::rule('article','api/v1.Article/addarticle',"POST");
 //上传文件
 Route::rule('upload','api/v1.Common/upload',"POST");
 Route::rule('mangyupload','api/v1.Common/uploads',"POST");

@@ -21,7 +21,7 @@ class User extends Api
         parent::_initialize();
     }
 
-    /**
+    /**sss
      * 会员中心
      */
     public function index()
