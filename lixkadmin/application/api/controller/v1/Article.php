@@ -4,9 +4,11 @@ namespace app\api\controller\v1;
 use app\common\controller\Api;
 use app\common\model\Article as ArticleModel;
 use think\Db;
+use think\Request;
+use think\Cache;
 
 class Article extends Api{
-    protected $noNeedLogin = ['addarticle'];
+    protected $noNeedLogin = ['addarticle','getfriend'];
     protected $noNeedRight = '*';
 
     public function _initialize()
@@ -34,5 +36,15 @@ class Article extends Api{
         }
 
         //show_json(1,array('url' => mobileUrl('xcshop/applys.levelchange', array('id' => $id))));
+    }
+    public function getfriend(){
+        $page=$this->request->get('page');
+        $page=empty($page)?1:$page;
+        Cache::clear();
+        $returnFriendData=Cache::get('friend_data'.$page);
+        if(empty($returnFriendData)){
+            $returnFriendData=ArticleModel::getFriendAll($page);
+        }
+        $this->success('获取成功',$returnFriendData);
     }
 }

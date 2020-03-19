@@ -362,3 +362,24 @@ if (!function_exists('hsv2rgb')) {
         ];
     }
 }
+
+//时间转换
+if (!function_exists('dateline')) {
+    function dateline($date)
+    {
+        $n = time();
+        $t = $n - $date;
+        $m = 86400 * 30;
+        if ($t <= 60) {
+            return ceil($t) . '秒前';
+        } else if ($t <= 3600) {
+            return ceil($t / 60) . '分钟前';
+        } else if ($t > 3600 && $t < 86400) {
+            return ceil($t / 3600) . '小时前';
+        } else if ($t > 86400 && $t < $m) {
+            return ceil($t / 86400) . '天前';
+        } else {
+            return date("Y-m-d", $date);
+        }
+    }
+}
