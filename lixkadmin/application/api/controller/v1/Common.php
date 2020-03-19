@@ -7,6 +7,7 @@ use app\common\model\Area;
 use app\common\model\Version;
 use fast\Random;
 use think\Config;
+use think\Request;
 
 /**
  * 公共接口测试1
@@ -130,8 +131,11 @@ class Common extends Api
             $attachment->data(array_filter($params));
             $attachment->save();
             \think\Hook::listen("upload_after", $attachment);
+            $request = Request::instance();
+            $domain=$request->domain();
             $this->success(__('Upload successful'), [
-                'url' => $uploadDir . $splInfo->getSaveName()
+                'url' => $uploadDir . $splInfo->getSaveName(),
+                'httpurl'=>$domain.$uploadDir . $splInfo->getSaveName()
             ]);
         } else {
             // 上传失败获取错误信息
@@ -230,7 +234,9 @@ class Common extends Api
                 $attachment->data(array_filter($params));
                 $attachment->save();
                 \think\Hook::listen("upload_after", $attachment);
-                $allpath[]=['url' => $uploadDir . $splInfo->getSaveName()];
+                $request = Request::instance();
+                $domain=$request->domain();
+                $allpath[]=['url' => $uploadDir . $splInfo->getSaveName(),'httpurl'=>$domain.$uploadDir . $splInfo->getSaveName()];
             } else {
                 // 上传失败获取错误信息
                 $this->error($file->getError());

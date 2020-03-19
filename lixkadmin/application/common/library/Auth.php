@@ -438,6 +438,9 @@ class Auth
         $allowFields = $this->getAllowFields();
         $userinfo = array_intersect_key($data, array_flip($allowFields));
         $userinfo = array_merge($userinfo, Token::get($this->_token));
+        $request = Request::instance();
+        $domain = $request->domain();
+        $userinfo['avatar']=$domain.$userinfo['avatar'];
         return $userinfo;
     }
 

@@ -168,10 +168,10 @@ class User extends Api
     public function profile()
     {
         $user = $this->auth->getUser();
-        $username = $this->request->request('username');
-        $nickname = $this->request->request('nickname');
-        $bio = $this->request->request('bio');
-        $avatar = $this->request->request('avatar', '', 'trim,strip_tags,htmlspecialchars');
+        $username = $this->request->post('username');
+        $nickname = $this->request->post('nickname');
+        $bio = $this->request->post('bio');
+        $avatar = $this->request->post('avatar', '', 'trim,strip_tags,htmlspecialchars');
         if ($username) {
             $exists = \app\common\model\User::where('username', $username)->where('id', '<>', $this->auth->id)->find();
             if ($exists) {
@@ -179,9 +179,15 @@ class User extends Api
             }
             $user->username = $username;
         }
-        $user->nickname = $nickname;
-        $user->bio = $bio;
-        $user->avatar = $avatar;
+        if($nickname){
+            $user->nickname = $nickname;
+        }
+        if($bio){
+            $user->bio = $bio;
+        }
+        if($avatar){
+            $user->avatar = $avatar;
+        }
         $user->save();
         $this->success();
     }
