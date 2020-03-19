@@ -8,7 +8,7 @@ use think\Request;
 use think\Cache;
 
 class Article extends Api{
-    protected $noNeedLogin = ['addarticle','getfriend'];
+    protected $noNeedLogin = ['getfriend'];
     protected $noNeedRight = '*';
 
     public function _initialize()
@@ -25,6 +25,10 @@ class Article extends Api{
             'all_path'=>serialize($all_path),
             'user_id'=>$uid
         );
+        $avatar=Db::name('user')->where('id',$uid)->value('avatar');
+        if(empty($avatar)){
+            $this->error("请先上传头像");
+        }
         Db::startTrans();
         try {
             $article = ArticleModel::create($params, true);
