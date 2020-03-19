@@ -7,6 +7,7 @@ use app\common\library\Ems;
 use app\common\library\Sms;
 use fast\Random;
 use think\Validate;
+use think\Db;
 
 /**
  * 会员接口
@@ -28,7 +29,25 @@ class User extends Api
     {
         $this->success('', ['welcome' => $this->auth->nickname]);
     }
-
+    //获取我的发布、粉丝、关注、消息
+    public function myinit(){
+        $userinfo=$this->auth->getUserinfo();
+        //我发布的
+        $release=Db::name('article')->where(['user_id'=>$userinfo['id'],'status'=>1,'isdelete'=>0])->count();
+        //我关注的
+        $focus=Db::name('focus')->where(['user_id'=>$userinfo['id'],'isdelete'=>0])->count();
+        //我的粉丝
+        $fans=Db::name('focus')->where(['to'=>$userinfo['id'],'isdelete'=>0])->count();
+        //消息数量
+        $news=Db::name('new')->where(['to'=>$userinfo['id'],'isdelete'=>0])->count();
+        $data=array(
+            'release'=>$release,
+            'focus'=>$focus,
+            'fans'=>$fans,
+            'news'=>$news
+        );
+        $this->success('获取成功',$data);
+    }
     /**
      * 会员登录
      *

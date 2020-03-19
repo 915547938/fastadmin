@@ -3,7 +3,7 @@
 namespace app\common\model;
 
 use think\Model;
-
+use think\Db;
 /**
  * 会员模型
  */
@@ -43,6 +43,9 @@ class User extends Model
             //如果不需要启用首字母头像，请使用
             //$value = '/assets/img/avatar.png';
             $value = letter_avatar($data['nickname']);
+        }
+        if($data['avatar']){
+            $value=$data['avatar'];
         }
         return $value;
     }
