@@ -43,7 +43,7 @@ class Article extends Model{
                 "post_id"=>$v['id'],
                 "uid"=> $v['user_id'],
                 "username"=>$user['username'],
-                "header_image"=> $domain.$user['avatar'],
+                "header_image"=> $user['avatar'],
                 "content"=>array(
                     "text"=>$v['content'],
                     "images"=>$images ,
