@@ -383,3 +383,68 @@ if (!function_exists('dateline')) {
         }
     }
 }
+//日志
+if (!function_exists('eblog')) {
+    function eblog($tag,$content,$file='')
+    {
+        //echo 2;exit;
+        if (is_array($content))
+        {
+            ob_start();
+            print_r($content);
+            $content = ob_get_contents();
+            ob_end_clean();
+            $content = "\n".$content."\n";
+        }
+        $paths=config('EBLOGPATH').date('Ymd').'/';
+        $pathurl=str_replace("\\","/",$paths);
+        $pathurl=str_replace("//","/",$pathurl);
+        //dump(($pathurl));
+        //dump(is_dir($pathurl));exit;
+        if (!is_dir($pathurl)){
+            xmkdir($pathurl);
+        }
+        if ($file)
+        {
+            $log_file = $pathurl.$file.date('Ymd').".log";
+        }
+        else
+        {
+            $log_file = $pathurl.date('Ymd').'/'.date('Ymd').".log";
+        }
+
+        $log = "[".date("YmdHis")."] ".$tag.":".$content;
+        //dump($log_file);exit;
+        $f = fopen($log_file,"ab+");
+        fwrite($f,$log."\n");
+        fclose($f);
+    }
+}
+/*
+*	递归创建目录
+*	必须是绝对目录
+*/
+function xmkdir($pathurl)
+{
+    $path = "";
+
+    //dump($pathurl);exit;
+    $str = explode("/",$pathurl);
+    $i=0;
+    foreach($str as $dir)
+    {
+        if (empty($dir)) continue;
+        //$path=str_replace("\\","/",$path);
+        if(strtoupper(substr(PHP_OS,0,3))=='WIN' && $i==0){
+            $path .= $dir;
+        }else{
+            $path .= "/".$dir;
+        }
+        //dump($path);exit;
+        if (!is_dir($path))
+        {
+            mkdir($path);
+        }
+        $i++;
+    }
+}

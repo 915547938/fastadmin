@@ -16,6 +16,7 @@ return [
     // | 应用设置
     // +----------------------------------------------------------------------
     // 应用命名空间
+    'EBLOGPATH'=> ROOT_PATH."/tmp/log/",
     'app_namespace'          => 'app',
     // 应用调试模式
     'app_debug'              => true,//Env::get('app.debug', true),

@@ -24,6 +24,7 @@ Route::rule('friend','api/v1.Article/getfriend',"get");
 //修改个人信息
 Route::rule('profile','api/v1.User/profile',"POST");
 Route::rule('myinit','api/v1.User/myinit',"get");
+Route::rule('like','api/v1.Article/dolike',"post");
 /*return [
     //别名配置,别名只能是映射到控制器且访问时必须加上请求的方法
     '__alias__'   => [
