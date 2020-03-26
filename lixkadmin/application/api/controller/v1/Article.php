@@ -49,11 +49,51 @@ class Article extends Api{
         //Cache::clear();
         $returnFriendData=$this->redis->hget('friend_data',$page);
         $returnFriendData=json_decode($returnFriendData,1);
+        $articleModel=new ArticleModel();
         if(empty($returnFriendData)){
-            $articleModel=new ArticleModel();
+
             $returnFriendData=$articleModel->getFriendAll($page);
             if($returnFriendData){
                 $this->redis->hset('friend_data',$page,json_encode($returnFriendData));
+            }
+        }
+        eblog('myclick',$this->auth->getUser(),'notify');
+        if($this->auth->id){
+            foreach($returnFriendData as &$v){
+                $myClickData=0;
+                $myClickData=$this->redis->hget('click_data',$this->auth->id.':'.$v['post_id']);
+                if(!($myClickData) && $myClickData!=0){
+                    $articleModel=new ArticleModel();
+                    $myClickData=$articleModel->getMyLick($this->auth->id,$v['post_id']);
+                    if($myClickData){
+                        $this->redis->hset('click_data',$this->auth->id.':'.$v['post_id'],($myClickData));
+                    }
+                }
+                if($myClickData)
+                    $v['mylike']=$myClickData;
+                else
+                    $v['mylike']=0;
+                $likeData=$this->redis->hGet('comment:wholike',$v['post_id']);
+                if(!($likeData)){
+                    $articleModel=new ArticleModel();
+                    $likeData=$articleModel->getArticleLike($v['post_id']);
+                    if($likeData){
+                        $this->redis->hset('comment:wholike',$v['post_id'],$likeData);
+                    }
+                }
+                $who=explode(",",$likeData);
+                $likeDatas=array();
+                if(!empty($likeData)){
+                    foreach($who as $vid){
+                        $username=Db::name('user')->where('id',$vid)->value('username');
+                        $likeDatas[]=array(
+                            'uid'=>$vid,
+                            'username'=>$username
+                        );
+                    }
+                }
+                $v['islike']=count($likeDatas);
+                $v['like']=$likeDatas;
             }
         }
         $this->success('获取成功',$returnFriendData);
@@ -63,7 +103,7 @@ class Article extends Api{
         $artId=$this->request->post('article');
         $type=$this->request->post('type');
         $article=Db::name('article')->where('id',$artId)->find();
-        if($article){
+        if($article && $this->auth->id){
             $articleModel=new ArticleModel();
             $res=$articleModel->dolixk($artId,$type,$this->auth->id);
             if($res){
@@ -73,7 +113,7 @@ class Article extends Api{
                 $this->error('失败');
             }
         }else{
-            $this->error('找不到此文章');
+            $this->error('找不到此文章,或者未登陆');
         }
     }
 
