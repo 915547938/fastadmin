@@ -3,8 +3,8 @@
 namespace app\api\controller\v1;
 
 use app\common\controller\Api;
-use app\common\library\Ems;
-use app\common\library\Sms;
+use app\common\library\Ems as EmsCom;
+use app\common\library\Sms as SmsCom;
 use fast\Random;
 use think\Validate;
 use think\Db;
@@ -48,6 +48,7 @@ class User extends Api
         );
         $this->success('获取成功',$data);
     }
+
     /**
      * 会员登录
      *
@@ -86,7 +87,7 @@ class User extends Api
         if (!Validate::regex($mobile, "^1\d{10}$")) {
             $this->error(__('Mobile is incorrect'));
         }
-        if (!Sms::check($mobile, $captcha, 'mobilelogin')) {
+        if (!SmsCom::check($mobile, $captcha, 'mobilelogin')) {
             $this->error(__('Captcha is incorrect'));
         }
         $user = \app\common\model\User::getByMobile($mobile);
@@ -100,7 +101,7 @@ class User extends Api
             $ret = $this->auth->register($mobile, Random::alnum(), '', $mobile, []);
         }
         if ($ret) {
-            Sms::flush($mobile, 'mobilelogin');
+            SmsCom::flush($mobile, 'mobilelogin');
             $data = ['userinfo' => $this->auth->getUserinfo()];
             $this->success(__('Logged in successful'), $data);
         } else {
@@ -133,7 +134,7 @@ class User extends Api
         if ($mobile && !Validate::regex($mobile, "^1\d{10}$")) {
             $this->error(__('Mobile is incorrect'));
         }
-        $ret = Sms::check($mobile, $code, 'register');
+        $ret = SmsCom::check($mobile, $code, 'register');
         if (!$ret) {
             $this->error(__('Captcha is incorrect'));
         }
@@ -231,7 +232,7 @@ class User extends Api
         if (\app\common\model\User::where('email', $email)->where('id', '<>', $user->id)->find()) {
             $this->error(__('Email already exists'));
         }
-        $result = Ems::check($email, $captcha, 'changeemail');
+        $result = EmsCom::check($email, $captcha, 'changeemail');
         if (!$result) {
             $this->error(__('Captcha is incorrect'));
         }
@@ -241,7 +242,7 @@ class User extends Api
         $user->email = $email;
         $user->save();
 
-        Ems::flush($email, 'changeemail');
+        EmsCom::flush($email, 'changeemail');
         $this->success();
     }
 
@@ -265,7 +266,7 @@ class User extends Api
         if (\app\common\model\User::where('mobile', $mobile)->where('id', '<>', $user->id)->find()) {
             $this->error(__('Mobile already exists'));
         }
-        $result = Sms::check($mobile, $captcha, 'changemobile');
+        $result = SmsCom::check($mobile, $captcha, 'changemobile');
         if (!$result) {
             $this->error(__('Captcha is incorrect'));
         }
@@ -275,7 +276,7 @@ class User extends Api
         $user->mobile = $mobile;
         $user->save();
 
-        Sms::flush($mobile, 'changemobile');
+        SmsCom::flush($mobile, 'changemobile');
         $this->success();
     }
 
@@ -335,11 +336,11 @@ class User extends Api
             if (!$user) {
                 $this->error(__('User not found'));
             }
-            $ret = Sms::check($mobile, $captcha, 'resetpwd');
+            $ret = SmsCom::check($mobile, $captcha, 'resetpwd');
             if (!$ret) {
                 $this->error(__('Captcha is incorrect'));
             }
-            Sms::flush($mobile, 'resetpwd');
+            SmsCom::flush($mobile, 'resetpwd');
         } else {
             if (!Validate::is($email, "email")) {
                 $this->error(__('Email is incorrect'));
@@ -348,11 +349,11 @@ class User extends Api
             if (!$user) {
                 $this->error(__('User not found'));
             }
-            $ret = Ems::check($email, $captcha, 'resetpwd');
+            $ret = EmsCom::check($email, $captcha, 'resetpwd');
             if (!$ret) {
                 $this->error(__('Captcha is incorrect'));
             }
-            Ems::flush($email, 'resetpwd');
+            EmsCom::flush($email, 'resetpwd');
         }
         //模拟一次登录
         $this->auth->direct($user->id);

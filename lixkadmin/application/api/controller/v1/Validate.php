@@ -3,7 +3,7 @@
 namespace app\api\controller\v1;
 
 use app\common\controller\Api;
-use app\common\model\User;
+use app\common\model\User as UserModel;
 
 /**
  * 验证接口
@@ -29,7 +29,7 @@ class Validate extends Api
     {
         $email = $this->request->request('email');
         $id = (int)$this->request->request('id');
-        $count = User::where('email', '=', $email)->where('id', '<>', $id)->count();
+        $count = UserModel::where('email', '=', $email)->where('id', '<>', $id)->count();
         if ($count > 0) {
             $this->error(__('邮箱已经被占用'));
         }
@@ -46,7 +46,7 @@ class Validate extends Api
     {
         $email = $this->request->request('username');
         $id = (int)$this->request->request('id');
-        $count = User::where('username', '=', $email)->where('id', '<>', $id)->count();
+        $count = UserModel::where('username', '=', $email)->where('id', '<>', $id)->count();
         if ($count > 0) {
             $this->error(__('用户名已经被占用'));
         }
@@ -63,7 +63,7 @@ class Validate extends Api
     {
         $mobile = $this->request->request('mobile');
         $id = (int)$this->request->request('id');
-        $count = User::where('mobile', '=', $mobile)->where('id', '<>', $id)->count();
+        $count = UserModel::where('mobile', '=', $mobile)->where('id', '<>', $id)->count();
         if ($count > 0) {
             $this->error(__('该手机号已经占用'));
         }
@@ -78,7 +78,7 @@ class Validate extends Api
     public function check_mobile_exist()
     {
         $mobile = $this->request->request('mobile');
-        $count = User::where('mobile', '=', $mobile)->count();
+        $count = UserModel::where('mobile', '=', $mobile)->count();
         if (!$count) {
             $this->error(__('手机号不存在'));
         }
@@ -93,7 +93,7 @@ class Validate extends Api
     public function check_email_exist()
     {
         $email = $this->request->request('email');
-        $count = User::where('email', '=', $email)->count();
+        $count = UserModel::where('email', '=', $email)->count();
         if (!$count) {
             $this->error(__('邮箱不存在'));
         }

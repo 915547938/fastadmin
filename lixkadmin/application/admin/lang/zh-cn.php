@@ -29,7 +29,7 @@ return [
     'Operate'                                               => '操作',
     'Warning'                                               => '温馨提示',
     'Default'                                               => '默认',
-    'Article'                                               => '文章',
+    'Article'                                               => '文章管理',
     'Page'                                                  => '单页',
     'OK'                                                    => '确定',
     'Apply'                                                 => '应用',

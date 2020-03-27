@@ -7,6 +7,9 @@ use think\Db;
 use think\Request;
 use think\Cache;
 
+/**
+ * 文章接口
+ */
 class Article extends Api{
     protected $noNeedLogin = ['getfriend'];
     protected $noNeedRight = '*';
