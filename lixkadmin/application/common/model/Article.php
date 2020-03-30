@@ -10,11 +10,20 @@ use think\Cache;
 
 class Article extends BaseModel{
     // 开启自动写入时间戳字段
+
     protected $autoWriteTimestamp = 'int';
     public $redis=null;
     public $num=1;
     public $score = 4320;
     public $liketype=0;
+    public function __construct($data = [])
+    {
+        parent::__construct($data);
+        $this->redis = new \Redis();
+        $this->redis->connect(config('cache.host'), config('cache.post'));
+        //eblog('redis',1111,'notify');
+    }
+
     public function getFriendall($page){
         $request = Request::instance();
         $domain = $request->domain();
@@ -32,14 +41,15 @@ class Article extends BaseModel{
                 $v1=$domain.$v1;
             }
             $islike=array();
-            $comments=Db::name('comments')
+            $comments=array();
+                /*Db::name('comments')
                 ->alias("c")
                 ->join('user u','c.uid=u.id','LEFT')
                 ->where('c.to',$v['id'])
                 ->where('c.pid',0)
                 ->field('u.username,u.id as uid,c.content')
                 ->limit(10)
-                ->select();
+                ->select();*/
 
             $oneArticle=array(
                 "post_id"=>$v['id'],
@@ -86,12 +96,33 @@ class Article extends BaseModel{
         }
         return $returnData;
     }
+    public function getArticleComment($artId,$type=0){
+        $con=Db::name('comments')
+            ->alias('c')
+            ->join('user u','u.id=c.uid','left')
+            ->where('c.to',$artId)
+            ->order('c.id','desc')
+            ->limit(10)
+            ->field('c.id,u.id as uid,u.username,c.content,c.pid')
+            ->select();
+        $returnCon=array_reverse($con);
+        foreach(array_reverse($con) as $v){
+            //缓存评论数量
+            $v['pname']=$v['username'];
+            $this->redis->zincrby('comment:ccount',$this->num,$artId);
+            //缓存最新10条数据
+            $len=$this->redis->hLen('comment:crecord'.':'.$artId);
+
+            $this->redis->hset('comment:crecord'.':'.$artId,$len,json_encode($v));
+        }
+        return $returnCon;
+    }
     public function dolixk($comment_id,$type,$user_id){
         //判断redis是否已经缓存了该文章数据
         //使用：分隔符对redis管理是友好的
         //这里使用redis zset-> zscore()方法
-        $this->redis = new \Redis();
-        $this->redis->connect(config('cache.host'), config('cache.post'));
+        //$this->redis = new \Redis();
+        //$this->redis->connect(config('cache.host'), config('cache.post'));
         if($this->redis->zscore("comment:like",$comment_id)){
             $rel=$this->redis->hGet("comment:record",$user_id.":".$comment_id);
             if(!$rel){
@@ -167,5 +198,35 @@ class Article extends BaseModel{
         );
         $json = json_encode($data);
         $this->redis->lpush("comment:uploadlist",$json);
+    }
+    public function docomment($article_id,$content,$user_id,$pid){
+        $data=array(
+            'uid'=>$user_id,
+            'what'=>'评论文章id'.$article_id,
+            'to'=>$article_id,
+            'content'=>$content,
+            'pid'=>$pid,
+            'create_time'=>time()
+        );
+        $commId=Db::name('comments')->insertGetId($data);
+        $username=Db::name('user')->where('id',$user_id)->value('username');
+        $coomData=array(
+            'id'=>$commId,
+            'uid'=>$user_id,
+            'username'=>$username,
+            'pid'=>$pid,
+            'pname'=>$username,
+            'content'=>$content,
+        );
+        if($commId){
+            //缓存评论数量
+            $this->redis->zincrby('comment:ccount',$this->num,$article_id);
+            //缓存最新10条数据
+            $len=$this->redis->hLen('comment:crecord'.':'.$article_id);
+            $this->redis->hset('comment:crecord'.':'.$article_id,$len,json_encode($coomData));
+            return true;
+        }else{
+            return false;
+        }
     }
 }

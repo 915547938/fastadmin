@@ -19,13 +19,17 @@ Route::rule('article','api/v1.Article/addarticle',"POST");
 //上传文件
 Route::rule('upload','api/v1.Common/upload',"POST");
 Route::rule('mangyupload','api/v1.Common/uploads',"POST");
-//获取朋友圈
+//获取美食秀数据
 Route::rule('friend','api/v1.Article/getfriend',"get");
 //修改个人信息
 Route::rule('profile','api/v1.User/profile',"POST");
+//个人中心的部分信息
 Route::rule('myinit','api/v1.User/myinit',"get");
+//点赞
 Route::rule('like','api/v1.Article/dolike',"post");
 Route::rule('index','api/v1.Index/index',"get");
+//评论
+Route::rule('comment','api/v1.Article/docomment','POST');
 /*return [
     //别名配置,别名只能是映射到控制器且访问时必须加上请求的方法
     '__alias__'   => [
