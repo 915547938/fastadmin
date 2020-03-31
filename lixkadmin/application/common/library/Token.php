@@ -51,7 +51,6 @@ class Token
 
             self::$instance[$name] = new $class($options);
         }
-
         return self::$instance[$name];
     }
 
@@ -74,7 +73,6 @@ class Token
 
             self::$handler = self::connect($options);
         }
-
         return self::$handler;
     }
 
@@ -121,6 +119,7 @@ class Token
      */
     public static function set($token, $user_id, $expire = null)
     {
+
         return self::init()->set($token, $user_id, $expire);
     }
 

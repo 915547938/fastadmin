@@ -362,3 +362,89 @@ if (!function_exists('hsv2rgb')) {
         ];
     }
 }
+
+//时间转换
+if (!function_exists('dateline')) {
+    function dateline($date)
+    {
+        $n = time();
+        $t = $n - $date;
+        $m = 86400 * 30;
+        if ($t <= 60) {
+            return ceil($t) . '秒前';
+        } else if ($t <= 3600) {
+            return ceil($t / 60) . '分钟前';
+        } else if ($t > 3600 && $t < 86400) {
+            return ceil($t / 3600) . '小时前';
+        } else if ($t > 86400 && $t < $m) {
+            return ceil($t / 86400) . '天前';
+        } else {
+            return date("Y-m-d", $date);
+        }
+    }
+}
+//日志
+if (!function_exists('eblog')) {
+    function eblog($tag,$content,$file='')
+    {
+        //echo 2;exit;
+        if (is_array($content))
+        {
+            ob_start();
+            print_r($content);
+            $content = ob_get_contents();
+            ob_end_clean();
+            $content = "\n".$content."\n";
+        }
+        $paths=config('EBLOGPATH').date('Ymd').'/';
+        $pathurl=str_replace("\\","/",$paths);
+        $pathurl=str_replace("//","/",$pathurl);
+        //dump(($pathurl));
+        //dump(is_dir($pathurl));exit;
+        if (!is_dir($pathurl)){
+            xmkdir($pathurl);
+        }
+        if ($file)
+        {
+            $log_file = $pathurl.$file.date('Ymd').".log";
+        }
+        else
+        {
+            $log_file = $pathurl.date('Ymd').'/'.date('Ymd').".log";
+        }
+
+        $log = "[".date("YmdHis")."] ".$tag.":".$content;
+        //dump($log_file);exit;
+        $f = fopen($log_file,"ab+");
+        fwrite($f,$log."\n");
+        fclose($f);
+    }
+}
+/*
+*	递归创建目录
+*	必须是绝对目录
+*/
+function xmkdir($pathurl)
+{
+    $path = "";
+
+    //dump($pathurl);exit;
+    $str = explode("/",$pathurl);
+    $i=0;
+    foreach($str as $dir)
+    {
+        if (empty($dir)) continue;
+        //$path=str_replace("\\","/",$path);
+        if(strtoupper(substr(PHP_OS,0,3))=='WIN' && $i==0){
+            $path .= $dir;
+        }else{
+            $path .= "/".$dir;
+        }
+        //dump($path);exit;
+        if (!is_dir($path))
+        {
+            mkdir($path);
+        }
+        $i++;
+    }
+}

@@ -121,7 +121,6 @@ class Api
 
         // token
         $token = $this->request->server('HTTP_TOKEN', $this->request->request('token', \think\Cookie::get('token')));
-
         $path = str_replace('.', '/', $controllername) . '/' . $actionname;
         // 设置当前请求的URI
         $this->auth->setRequestUri($path);
